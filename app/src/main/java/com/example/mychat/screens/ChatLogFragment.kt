@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.mychat.adapters.ChatLogAdapter
 import com.example.mychat.databinding.FragmentChatLogBinding
@@ -60,7 +62,38 @@ class ChatLogFragment : Fragment() {
 
         }
 
+//        activity?.onBackPressedDispatcher?.addCallback(this, object: OnBackPressedCallback(true) {
+//            override fun handleOnBackPressed() {
+//                findNavController().navigate(
+//                    ChatLogFragmentDirections.actionChatLogFragmentToHomeScreenFragment()
+//                )
+//            }
+//
+//        })
+
         return binding.root
+    }
+
+    private fun loadMessages(directory: String) {
+        val ref = FirebaseDatabase.getInstance().getReference(directory)
+        ref.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    snapshot.children.forEach {
+                        val msg = it.getValue(ChatMessage::class.java)
+                        if (msg != null) {
+                            messages.add(msg)
+                        }
+                    }
+                    adapter.notifyDataSetChanged()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
     }
 
     private fun sendMessage(directory: String) {
@@ -118,5 +151,7 @@ class ChatLogFragment : Fragment() {
 
         })
     }
+
+
 
 }

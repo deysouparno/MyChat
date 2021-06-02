@@ -8,41 +8,41 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.example.mychat.databinding.ChatLogFromItemBinding
-import com.example.mychat.databinding.ChatLogToItemBinding
+import com.example.mychat.databinding.ChatLogRecieveItemBinding
+import com.example.mychat.databinding.ChatLogSendItemBinding
 import com.example.mychat.models.ChatMessage
 
-private const val toViewHolder = 1
-private const val fromViewHolder = 0
+private const val sendViewHolder = 1
+private const val receiveViewHolder = 0
 
 class ChatLogAdapter(
     private val fromPerson: String,
-    private val chatFromImg: String,
-    private val chatToImg: String
+    private val senderImg: String,
+    private val receiverImg: String
 ) : ListAdapter<ChatMessage, RecyclerView.ViewHolder>(ChatMessageDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == toViewHolder) {
-            ChatToViewHolder.from(parent)
+        return if (viewType == sendViewHolder) {
+            ChatSendViewHolder.from(parent)
         } else {
-            ChatFromViewHolder.from(parent)
+            ChatReceiveViewHolder.from(parent)
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = getItem(position)
-        if (getItemViewType(position) == fromViewHolder) {
-            (holder as ChatFromViewHolder).bind(message, chatFromImg)
+        if (getItemViewType(position) == receiveViewHolder) {
+            (holder as ChatReceiveViewHolder).bind(message, receiverImg)
         } else {
-            (holder as ChatToViewHolder).bind(message, chatToImg)
+            (holder as ChatSendViewHolder).bind(message, senderImg)
         }
     }
 
     override fun getItemViewType(position: Int): Int {
         return if (getItem(position).fromPerson == fromPerson) {
-            fromViewHolder
+            sendViewHolder
         } else {
-            toViewHolder
+            receiveViewHolder
         }
     }
 
@@ -60,7 +60,7 @@ class ChatLogAdapter(
 
 }
 
-class ChatFromViewHolder(val binding: ChatLogFromItemBinding) :
+class ChatReceiveViewHolder(val binding: ChatLogRecieveItemBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
     fun bind(message: ChatMessage, chatFromImg: String) {
@@ -73,15 +73,15 @@ class ChatFromViewHolder(val binding: ChatLogFromItemBinding) :
     }
 
     companion object {
-        fun from(parent: ViewGroup): ChatFromViewHolder {
+        fun from(parent: ViewGroup): ChatReceiveViewHolder {
             val binding =
-                ChatLogFromItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return ChatFromViewHolder(binding)
+                ChatLogRecieveItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            return ChatReceiveViewHolder(binding)
         }
     }
 }
 
-class ChatToViewHolder(val binding: ChatLogToItemBinding) : RecyclerView.ViewHolder(binding.root) {
+class ChatSendViewHolder(val binding: ChatLogSendItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(message: ChatMessage, chatToImg: String) {
         binding.textTo.text = message.text
@@ -93,10 +93,10 @@ class ChatToViewHolder(val binding: ChatLogToItemBinding) : RecyclerView.ViewHol
     }
 
     companion object {
-        fun from(parent: ViewGroup): ChatToViewHolder {
+        fun from(parent: ViewGroup): ChatSendViewHolder {
             val binding =
-                ChatLogToItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return ChatToViewHolder(binding)
+                ChatLogSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            return ChatSendViewHolder(binding)
         }
     }
 }

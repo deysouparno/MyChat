@@ -32,48 +32,49 @@ class LoginFragment : Fragment() {
 
         binding.loginButton.setOnClickListener {
             if (binding.loginEmail.text.isBlank()
-                || binding.loginPassword.text.isBlank()) {
+                || binding.loginPassword.text.isBlank()
+            ) {
                 Toast.makeText(context, "invalid credentials", Toast.LENGTH_SHORT).show()
-
             } else if (binding.loginPassword.text.length < 6) {
                 Toast.makeText(context, "invalid credentials", Toast.LENGTH_SHORT).show()
             } else {
                 binding.loginProgressBar.visibility = View.VISIBLE
-                val path = login(binding.loginEmail.text.toString(), binding.loginPassword.text.toString())
-                if (path == null) {
-                    Toast.makeText(context, "Something wrong", Toast.LENGTH_SHORT).show()
-                } else {
-                    goToHomeScreen(path)
-                }
+                login(binding.loginEmail.text.toString(), binding.loginPassword.text.toString())
+
             }
         }
 
         return binding.root
     }
 
-    private fun login(email: String, password: String): String? {
-        var result: String? = null
+    private fun login(email: String, password: String) {
+
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 binding.loginProgressBar.visibility = View.GONE
                 if (task.isSuccessful) {
                     Log.d("Login", "Successfully logged in")
+                    Toast.makeText(context, "Successfully logged in", Toast.LENGTH_SHORT).show()
 //                    Log.d("Login", "task result is ${task.result!!.user!!.uid}")
-                    result = "/users/${task.result!!.user!!.uid.trim()}"
+                    val result = "/users/${task.result!!.user!!.uid.trim()}"
+                    goToHomeScreen(result)
                 }
                 else if (task.isCanceled) {
                     Toast.makeText(context, "wrong email password", Toast.LENGTH_SHORT).show()
                 }
             }
+            .addOnFailureListener {
+                Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
+                Log.d("Login", "${it.message}")
+            }
 
-        return result
     }
 
     private fun goToHomeScreen(directory: String) {
         val ref = FirebaseDatabase.getInstance().getReference(directory)
         ref.get()
             .addOnCompleteListener { task2 ->
-//                            Log.d("Login", "task2 result is ${task2.result}")
+                Log.d("Login", "task2 complete")
                 if (task2.isSuccessful && task2.result != null) {
                     val userObj = task2.result!!.getValue(User::class.java)!!
                     saveData(userObj.uid, userObj.username, userObj.profileImg)
@@ -93,8 +94,7 @@ class LoginFragment : Fragment() {
             putString("username", username)
             putString("uid", uid)
             putString("image", profileImg)
-            commit()
-        }
+        }?.apply()
 
     }
 

@@ -1,10 +1,9 @@
 package com.example.mychat.screens
 
-import android.content.Intent
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -56,6 +55,7 @@ class HomeScreenFragment : Fragment() {
         when (item.itemId) {
             R.id.logout_menu_item -> {
                 FirebaseAuth.getInstance().signOut()
+                deleteData()
                 Log.d("log out", "logged out successfully")
                 findNavController().navigate(
                     HomeScreenFragmentDirections.actionHomeScreenFragmentToLoginFragment()
@@ -69,6 +69,17 @@ class HomeScreenFragment : Fragment() {
     private fun listenMessages(username: String) {
         val directory = "${username}chats"
         val ref = FirebaseDatabase.getInstance().getReference(directory)
+
+    }
+
+    private fun deleteData() {
+        val sharedPref = context?.getSharedPreferences("user", Context.MODE_PRIVATE)
+        val editor = sharedPref?.edit()
+        editor?.apply {
+            remove("username")
+            remove("uid")
+            remove("image")
+        }?.apply()
 
     }
 

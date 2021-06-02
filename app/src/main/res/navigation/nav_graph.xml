@@ -65,7 +65,8 @@
         tools:layout="@layout/fragment_new_chat" >
         <action
             android:id="@+id/action_newChatFragment_to_chatLogFragment"
-            app:destination="@id/chatLogFragment" />
+            app:destination="@id/chatLogFragment"
+            app:popUpTo="com.android.tools.property.panel.api.EnumValue$Companion$LOADING$1@1f24fae7" />
         <argument
             android:name="userObj"
             app:argType="com.example.mychat.models.User" />
