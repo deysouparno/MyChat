@@ -5,8 +5,9 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="email">Email</string>
-    <string name="already_have_an_account">Already have an account </string>
+    <string name="already_have_an_account">Already have an account ?</string>
     <string name="log_in"><u>Log in</u></string>
-    <string name="don_t_have_an_account">don\'t have an account? </string>
+    <string name="don_t_have_an_account">don\'t have an account ?</string>
     <string name="register"><u>Register</u></string>
+    <string name="type_a_message">Type a message</string>
 </resources>

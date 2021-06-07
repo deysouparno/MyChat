@@ -1,18 +1,21 @@
 package com.example.mychat.screens
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.example.mychat.MainActivity
 import com.example.mychat.databinding.FragmentSingnUpBinding
 import com.example.mychat.models.User
 import com.google.firebase.auth.FirebaseAuth
@@ -46,9 +49,9 @@ class SignUpFragment : Fragment() {
     ): View? {
 
         if (FirebaseAuth.getInstance().currentUser != null) {
-            findNavController().navigate(
-                SignUpFragmentDirections.actionSingnUpFragmentToHomeScreenFragment(getData())
-            )
+
+            startActivity(Intent(context, MainActivity::class.java))
+            activity?.finish()
 //            FirebaseDatabase.getInstance().getReference("/users/${FirebaseAuth.getInstance().uid}").child("isOnline").setValue(true)
         }
 
@@ -58,7 +61,7 @@ class SignUpFragment : Fragment() {
 
         binding.LoginText.setOnClickListener {
             it.findNavController().navigate(
-                SignUpFragmentDirections.actionSingnUpFragmentToLoginFragment()
+                SignUpFragmentDirections.actionSignUpFragmentToLoginFragment()
             )
         }
 
@@ -76,6 +79,11 @@ class SignUpFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
+                binding.registerProgressBar.visibility = View.VISIBLE
+                (context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .hideSoftInputFromWindow(it.windowToken, 0)
+//                it.clearFocus()
+                activity?.currentFocus?.clearFocus()
                 signUp(
                     binding.registerEmail.text.toString(),
                     binding.registerPassword.text.toString(),
@@ -92,6 +100,7 @@ class SignUpFragment : Fragment() {
         return binding.root
     }
 
+
     private fun signUp(email: String, password: String, username: String) {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
@@ -101,8 +110,9 @@ class SignUpFragment : Fragment() {
                     Log.d(Tag, "registered successfully")
                     uploadDetails(username)
                 } else {
-                    Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show()
-                    Log.d(Tag, "registration failed")
+                    binding.registerProgressBar.visibility = View.GONE
+                    Toast.makeText(context, "registration failed", Toast.LENGTH_SHORT).show()
+
                 }
             }
     }
@@ -117,14 +127,6 @@ class SignUpFragment : Fragment() {
             commit()
         }
 
-    }
-
-    private fun getData(): User {
-        val sharedPref = context?.getSharedPreferences("user", Context.MODE_PRIVATE)
-        val username = sharedPref?.getString("username", "")?:""
-        val uid = sharedPref?.getString("uid", "") ?:""
-        val image = sharedPref?.getString("image", "") ?:""
-        return User(uid, username, true, image)
     }
 
     private fun uploadDetails(username: String) {
@@ -169,11 +171,13 @@ class SignUpFragment : Fragment() {
                                         "user added to database",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    findNavController().navigate(
-                                        SignUpFragmentDirections.actionSingnUpFragmentToHomeScreenFragment(userObj)
-                                    )
+
+                                    binding.registerProgressBar.visibility = View.GONE
+                                    startActivity(Intent(context, MainActivity::class.java))
+                                    activity?.finish()
 
                                 } else {
+                                    binding.registerProgressBar.visibility = View.GONE
                                     Toast.makeText(
                                         context,
                                         "failed to add user",

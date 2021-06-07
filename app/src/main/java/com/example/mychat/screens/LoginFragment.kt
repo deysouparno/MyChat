@@ -1,15 +1,19 @@
 package com.example.mychat.screens
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.example.mychat.MainActivity
 import com.example.mychat.databinding.FragmentLoginBinding
 import com.example.mychat.models.User
 import com.google.firebase.auth.FirebaseAuth
@@ -26,7 +30,7 @@ class LoginFragment : Fragment() {
         binding = FragmentLoginBinding.inflate(inflater)
 
         binding.SigninText.setOnClickListener {
-            val action = LoginFragmentDirections.actionLoginFragmentToSingnUpFragment()
+            val action = LoginFragmentDirections.actionLoginFragmentToSignUpFragment()
             it.findNavController().navigate(action)
         }
 
@@ -38,6 +42,9 @@ class LoginFragment : Fragment() {
             } else if (binding.loginPassword.text.length < 6) {
                 Toast.makeText(context, "invalid credentials", Toast.LENGTH_SHORT).show()
             } else {
+                (context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .hideSoftInputFromWindow(it.windowToken, 0)
+                it.clearFocus()
                 binding.loginProgressBar.visibility = View.VISIBLE
                 login(binding.loginEmail.text.toString(), binding.loginPassword.text.toString())
 
@@ -58,8 +65,7 @@ class LoginFragment : Fragment() {
 //                    Log.d("Login", "task result is ${task.result!!.user!!.uid}")
                     val result = "/users/${task.result!!.user!!.uid.trim()}"
                     goToHomeScreen(result)
-                }
-                else if (task.isCanceled) {
+                } else if (task.isCanceled) {
                     Toast.makeText(context, "wrong email password", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -78,9 +84,9 @@ class LoginFragment : Fragment() {
                 if (task2.isSuccessful && task2.result != null) {
                     val userObj = task2.result!!.getValue(User::class.java)!!
                     saveData(userObj.uid, userObj.username, userObj.profileImg)
-                    findNavController().navigate(
-                        LoginFragmentDirections.actionLoginFragmentToHomeScreenFragment(userObj)
-                    )
+//
+                    startActivity(Intent(context, MainActivity::class.java))
+                    activity?.finish()
                 } else {
                     Log.d("Login", "Login e problem bc")
                 }

@@ -8,14 +8,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.example.mychat.R
-import com.example.mychat.databinding.ChatItemBinding
+import com.example.mychat.adapters.NewChatAdapter
 import com.example.mychat.databinding.FragmentNewChatBinding
+import com.example.mychat.interfaces.ClickListener
 import com.example.mychat.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -41,6 +36,7 @@ class NewChatFragment : Fragment(), ClickListener {
         adapter = NewChatAdapter(this)
         getUsers()
         binding.userRecyclerView.adapter = adapter
+        Log.d("BackStack", "back stack size is ${findNavController().backStack.size}")
         return binding.root
     }
 
@@ -83,62 +79,9 @@ class NewChatFragment : Fragment(), ClickListener {
                 chatFromPerson
             )
         )
-    }
-
-}
-
-class NewChatAdapter(private val listener: ClickListener) :
-    ListAdapter<User, NewChatAdapter.UserViewHolder>(UserItemDiffCallback) {
-
-    class UserViewHolder private constructor(val binding: ChatItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(user: User) {
-            binding.personName.text = user.username
-            Glide.with(binding.imageView.context)
-                .load(user.profileImg)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .centerCrop()
-                .circleCrop()
-                .error(R.drawable.loading)
-                .into(binding.imageView)
-
-        }
-
-        companion object {
-            fun from(parent: ViewGroup, listener: ClickListener): UserViewHolder {
-                val binding =
-                    ChatItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-                val viewHolder = UserViewHolder(binding)
-                binding.root.setOnClickListener {
-                    listener.onClick(viewHolder.adapterPosition)
-                }
-                return viewHolder
-            }
-        }
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        return UserViewHolder.from(parent, listener)
-    }
-
-    override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
-        val user = getItem(position)
-        holder.bind(user)
-    }
-
-    object UserItemDiffCallback : DiffUtil.ItemCallback<User>() {
-        override fun areItemsTheSame(oldItem: User, newItem: User): Boolean =
-            oldItem.uid == newItem.uid
-
-        override fun areContentsTheSame(oldItem: User, newItem: User): Boolean = oldItem == newItem
-    }
-
-}
-
-interface ClickListener {
-    fun onClick(position: Int)
 }
 
 
