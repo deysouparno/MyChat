@@ -3,11 +3,13 @@ package com.example.mychat.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.mychat.R
 import com.example.mychat.databinding.ChatLogRecieveItemBinding
 import com.example.mychat.databinding.ChatLogSendItemBinding
 import com.example.mychat.models.ChatMessage
@@ -36,6 +38,7 @@ class ChatLogAdapter(
         } else {
             (holder as ChatSendViewHolder).bind(message, senderImg)
         }
+
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -68,8 +71,10 @@ class ChatReceiveViewHolder(val binding: ChatLogRecieveItemBinding) :
         Glide.with(binding.imageViewFrom.context)
             .load(chatFromImg)
             .circleCrop()
+            .placeholder(R.drawable.ic_baseline_account_circle_24)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(binding.imageViewFrom)
+        binding.root.startAnimation(AnimationUtils.loadAnimation(binding.root.context, R.anim.chat_enter))
     }
 
     companion object {
@@ -88,8 +93,10 @@ class ChatSendViewHolder(val binding: ChatLogSendItemBinding) : RecyclerView.Vie
         Glide.with(binding.imageViewTo.context)
             .load(chatToImg)
             .circleCrop()
+            .placeholder(R.drawable.ic_baseline_account_circle_24)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(binding.imageViewTo)
+        binding.root.startAnimation(AnimationUtils.loadAnimation(binding.root.context, R.anim.chat_enter))
     }
 
     companion object {

@@ -13,4 +13,20 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="chatBubble_send">
+        <item name="android:backgroundTint">#00897b</item>
+        <item name="android:textColor">#fafafa</item>
+    </style>
+
+    <style name="chatBubble_receive">
+        <item name="android:backgroundTint">#263238</item>
+        <item name="android:textColor">#fafafa</item>
+    </style>
+
+    <style name="type_message">
+        <item name="android:backgroundTint">#102027</item>
+        <item name="android:textColor">#fafafa</item>
+        <item name="android:textColorHint">#fafafa</item>
+    </style>
 </resources>
