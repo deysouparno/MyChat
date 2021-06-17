@@ -1,85 +1,159 @@
 package com.example.mychat.screens
 
+import android.app.Activity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.example.mychat.R
+import com.example.mychat.SharedViewModel
 import com.example.mychat.adapters.NewChatAdapter
 import com.example.mychat.databinding.FragmentNewChatBinding
 import com.example.mychat.interfaces.ClickListener
 import com.example.mychat.models.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.example.mychat.viewmodels.NewChatViewModel
+import com.example.mychat.viewmodels.NewChatViewModelFactory
+import java.util.*
+import kotlin.collections.ArrayList
 
-private const val Tag = "NewChat"
 
 class NewChatFragment : Fragment(), ClickListener {
 
+    private val sharedViewModel: SharedViewModel by activityViewModels()
     private lateinit var binding: FragmentNewChatBinding
     private lateinit var adapter: NewChatAdapter
-    private lateinit var users: ArrayList<User>
     private lateinit var chatFromPerson: User
+    private lateinit var viewModel: NewChatViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentNewChatBinding.inflate(inflater)
+        setHasOptionsMenu(true)
+        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.newChatToolbar)
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val args: NewChatFragmentArgs by navArgs()
         chatFromPerson = args.userObj
         adapter = NewChatAdapter(this)
-        getUsers()
+        handleSearch()
+        viewModel =
+            ViewModelProvider(this, NewChatViewModelFactory(chatFromPerson.username)).get(
+                NewChatViewModel::class.java
+            )
         binding.userRecyclerView.adapter = adapter
+//        viewModel.getUsers()
+        activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().navigateUp()
+            }
+
+        })
+
+        viewModel.onChange.observe(viewLifecycleOwner, {
+            adapter.submitList(viewModel.users)
+            adapter.notifyDataSetChanged()
+            Log.d("newchat", "${viewModel.users.size}")
+            Log.d("newchat", "observer called")
+        })
+
+        binding.closeImg.setOnClickListener {
+            (context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(binding.searchEditText.windowToken, 0)
+
+            binding.searchView.startAnimation(
+                AnimationUtils.loadAnimation(
+                    context,
+                    R.anim.search_exit
+                )
+            )
+            adapter.submitList(viewModel.users)
+            binding.searchEditText.text.clear()
+            binding.searchView.isVisible = false
+        }
+
         Log.d("BackStack", "back stack size is ${findNavController().backStack.size}")
         return binding.root
     }
 
-    private fun getUsers() {
-        val ref = FirebaseDatabase.getInstance().getReference("/users")
-        users = ArrayList()
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-
-                if (!snapshot.exists()) {
-                    Log.d(Tag, "snapshot does not exist")
-                } else {
-
-                    snapshot.children.forEach {
-                        val user = it.getValue(User::class.java)
-
-                        if (user != null && user.uid != FirebaseAuth.getInstance().uid) {
-                            users.add(user)
-                            Log.d(Tag, "new user added")
-                        }
-                    }
-
-                    adapter.submitList(users)
-                    adapter.notifyDataSetChanged()
-                }
-
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.d(Tag, "cancelled getUsers")
-            }
-
-        })
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.new_chat_menu, menu)
     }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                findNavController().navigateUp()
+//                findNavController().navigate(
+//                    NewChatFragmentDirections.actionNewChatFragmentToHomeScreenFragment()
+//                )
+            }
+            R.id.search_menu_item -> {
+                binding.searchView.startAnimation(
+                    AnimationUtils.loadAnimation(
+                        context,
+                        R.anim.search_enter
+                    )
+                )
+                (context?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .showSoftInput(binding.searchEditText, 0)
+                binding.searchEditText.requestFocus()
+                binding.searchView.isVisible = true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 
     override fun onClick(position: Int) {
         findNavController().navigate(
             NewChatFragmentDirections.actionNewChatFragmentToChatLogFragment(
-                users[position],
+                viewModel.users[position],
                 chatFromPerson
             )
         )
 
+    }
+
+    private fun filter(text: String) {
+        val filteredList = ArrayList<User>()
+        viewModel.users.forEach {
+            if (it.username.lowercase(Locale.getDefault())
+                    .contains(text.lowercase(Locale.getDefault()))
+            ) {
+                filteredList.add(it)
+            }
+        }
+        adapter.submitList(filteredList)
+    }
+
+    private fun handleSearch() {
+        binding.searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                s?.let {
+                    filter(s.toString())
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                filter(s.toString())
+            }
+
+        })
     }
 
 }

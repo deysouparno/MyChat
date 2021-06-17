@@ -10,7 +10,9 @@ import com.example.mychat.databinding.ChatItemBinding
 import com.example.mychat.interfaces.ClickListener
 import com.example.mychat.models.HomeScreenUser
 
-class HomeScreenAdapter(private val chats: ArrayList<HomeScreenUser>, private val listener: ClickListener, private val username: String) :
+class HomeScreenAdapter(private var chats: ArrayList<HomeScreenUser>,
+                        private val listener: ClickListener,
+                        private val username: String) :
     RecyclerView.Adapter<HomeScreenViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HomeScreenViewHolder {
         return HomeScreenViewHolder.form(parent, listener)
@@ -23,8 +25,10 @@ class HomeScreenAdapter(private val chats: ArrayList<HomeScreenUser>, private va
     override fun getItemCount(): Int {
         return chats.size
     }
-    private fun addItem(item: HomeScreenUser) {
 
+    fun updateList(items: ArrayList<HomeScreenUser>) {
+        chats = items
+        notifyDataSetChanged()
     }
 }
 

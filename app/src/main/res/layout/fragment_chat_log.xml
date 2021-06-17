@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp"
+    android:fillViewport="true"
     tools:context=".screens.ChatLogFragment">
 
 
@@ -14,15 +14,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/chat_log_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chat_log_RV"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:paddingHorizontal="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/message_type"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/chat_log_toolbar" />
 
     <EditText
         android:id="@+id/message_type"
@@ -32,8 +42,10 @@
         android:background="@drawable/rounded_shape"
         android:hint="@string/type_a_message"
         android:imeOptions="flagNoExtractUi"
+        android:layout_marginStart="5dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/send_button"
         app:layout_constraintStart_toStartOf="parent" />
@@ -43,10 +55,11 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:padding="5dp"
+        android:layout_marginEnd="5dp"
         android:src="@drawable/send2"
         app:layout_constraintBottom_toBottomOf="@id/message_type"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/message_type" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-</RelativeLayout>
+</ScrollView>

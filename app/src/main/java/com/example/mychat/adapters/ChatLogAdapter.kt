@@ -1,6 +1,7 @@
 package com.example.mychat.adapters
 
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -23,6 +24,8 @@ class ChatLogAdapter(
     private val receiverImg: String
 ) : ListAdapter<ChatMessage, RecyclerView.ViewHolder>(ChatMessageDiffCallback) {
 
+    var flag = false
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == sendViewHolder) {
             ChatSendViewHolder.from(parent)
@@ -39,6 +42,17 @@ class ChatLogAdapter(
             (holder as ChatSendViewHolder).bind(message, senderImg)
         }
 
+        if (flag) {
+            Log.d("chatanim", "animation called")
+            holder.itemView.startAnimation(
+                AnimationUtils.loadAnimation(
+                    holder.itemView.context,
+                    R.anim.chat_enter
+                )
+            )
+            flag = false
+        }
+
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -47,6 +61,11 @@ class ChatLogAdapter(
         } else {
             receiveViewHolder
         }
+    }
+
+    fun addItem() {
+        flag = true
+        notifyItemInserted(itemCount-1)
     }
 
 
@@ -59,7 +78,6 @@ class ChatLogAdapter(
             return oldItem == newItem
         }
     }
-
 
 }
 
@@ -74,7 +92,7 @@ class ChatReceiveViewHolder(val binding: ChatLogRecieveItemBinding) :
             .placeholder(R.drawable.ic_baseline_account_circle_24)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(binding.imageViewFrom)
-        binding.root.startAnimation(AnimationUtils.loadAnimation(binding.root.context, R.anim.chat_enter))
+//        binding.root.startAnimation(AnimationUtils.loadAnimation(binding.root.context, R.anim.pop_enter))
     }
 
     companion object {
@@ -96,7 +114,7 @@ class ChatSendViewHolder(val binding: ChatLogSendItemBinding) : RecyclerView.Vie
             .placeholder(R.drawable.ic_baseline_account_circle_24)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(binding.imageViewTo)
-        binding.root.startAnimation(AnimationUtils.loadAnimation(binding.root.context, R.anim.chat_enter))
+//        binding.root.startAnimation(AnimationUtils.loadAnimation(binding.root.context, R.anim.pop_enter))
     }
 
     companion object {

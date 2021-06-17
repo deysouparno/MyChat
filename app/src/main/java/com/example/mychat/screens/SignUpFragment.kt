@@ -11,37 +11,51 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.example.mychat.MainActivity
+import com.canhub.cropper.CropImage
+import com.canhub.cropper.CropImageView
+import com.example.mychat.SharedViewModel
 import com.example.mychat.databinding.FragmentSingnUpBinding
 import com.example.mychat.models.User
+import com.example.mychat.viewmodels.SignUpViewModel
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.flow.collect
 
 private const val Tag = "SignUp"
 
 class SignUpFragment : Fragment() {
 
-    private var currentUser: FirebaseUser? = null
-    private lateinit var binding: FragmentSingnUpBinding
-    private var selectedPhoto: Uri? = null
-    private val result = registerForActivityResult(ActivityResultContracts.GetContent()) {
-        if (it != null) {
-            selectedPhoto = it
-            Glide.with(this)
-                .load(it)
-                .centerCrop()
-                .circleCrop()
-                .into(binding.profileImage)
+    private val cropActivityResultContracts = object : ActivityResultContract<Any?, Uri?>() {
+        override fun createIntent(context: Context, input: Any?): Intent {
+            return CropImage
+                .activity()
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setAspectRatio(1, 1)
+                .setCropShape(CropImageView.CropShape.RECTANGLE)
+                .getIntent(context)
+        }
 
+        override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
+            return CropImage.getActivityResult(intent)?.uriContent
         }
 
     }
+    private lateinit var cropActivityResultLauncher: ActivityResultLauncher<Any?>
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+
+    //    private var currentUser: FirebaseUser? = null
+    private lateinit var binding: FragmentSingnUpBinding
+    private var selectedPhoto: Uri? = null
+    private val viewModel: SignUpViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,10 +63,9 @@ class SignUpFragment : Fragment() {
     ): View? {
 
         if (FirebaseAuth.getInstance().currentUser != null) {
-
-            startActivity(Intent(context, MainActivity::class.java))
-            activity?.finish()
-//            FirebaseDatabase.getInstance().getReference("/users/${FirebaseAuth.getInstance().uid}").child("isOnline").setValue(true)
+            findNavController().navigate(
+                SignUpFragmentDirections.actionSignUpFragmentToHomeScreenFragment()
+            )
         }
 
         binding = FragmentSingnUpBinding.inflate(inflater)
@@ -60,19 +73,17 @@ class SignUpFragment : Fragment() {
         Log.d(Tag, "current user is ${FirebaseAuth.getInstance().currentUser?.uid}")
 
         binding.LoginText.setOnClickListener {
-            it.findNavController().navigate(
-                SignUpFragmentDirections.actionSignUpFragmentToLoginFragment()
-            )
+            it.findNavController().navigateUp()
         }
 
 
         binding.registerButton.setOnClickListener {
-            if (binding.registerUsername.text.isBlank()
-                || binding.registerEmail.text.isBlank()
-                || binding.registerUsername.text.isBlank()
+            if (binding.registerUsername.text!!.isBlank()
+                || binding.registerEmail.text!!.isBlank()
+                || binding.registerUsername.text!!.isBlank()
             ) {
                 Toast.makeText(context, "invalid", Toast.LENGTH_SHORT).show()
-            } else if (binding.registerPassword.text.length < 6) {
+            } else if (binding.registerPassword.text!!.length < 6) {
                 Toast.makeText(
                     context,
                     "password must be at least 6 characters",
@@ -84,112 +95,73 @@ class SignUpFragment : Fragment() {
                     .hideSoftInputFromWindow(it.windowToken, 0)
 //                it.clearFocus()
                 activity?.currentFocus?.clearFocus()
-                signUp(
+                viewModel.signUp(
                     binding.registerEmail.text.toString(),
-                    binding.registerPassword.text.toString(),
-                    binding.registerUsername.text.toString()
+                    binding.registerPassword.text.toString()
                 )
             }
         }
 
+        cropActivityResultLauncher = registerForActivityResult(cropActivityResultContracts) {
+            it?.let {
+                selectedPhoto = it
+                Glide.with(this)
+                    .load(it)
+                    .centerCrop()
+                    .circleCrop()
+                    .into(binding.profileImage)
+            }
+        }
 
         binding.profileImage.setOnClickListener {
-            result.launch("image/*")
+            cropActivityResultLauncher.launch(null)
+        }
+
+//        Log.d("BackStack", "back stack size is ${findNavController().backStack.size}")
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.signInUiState.collect {
+                when (it) {
+                    is SignUpViewModel.SignInUiState.Registered -> {
+                        Log.d("SignUp", "user registered")
+                        viewModel.uploadImage(selectedPhoto, viewModel.uid)
+                    }
+
+                    is SignUpViewModel.SignInUiState.ImgUploaded -> {
+                        val user = User(
+                            viewModel.uid,
+                            binding.registerUsername.text.toString(),
+                            true,
+                            viewModel.imgUrl
+                        )
+                        sharedViewModel.saveData(
+                            context,
+                            user.uid,
+                            user.username,
+                            user.profileImg,
+                            binding.registerPassword.text.toString(),
+                            binding.registerEmail.text.toString()
+                        )
+                        viewModel.uploadUserData(user)
+                    }
+
+                    is SignUpViewModel.SignInUiState.Success -> {
+                        findNavController().navigate(
+                            SignUpFragmentDirections.actionSignUpFragmentToHomeScreenFragment()
+                        )
+                    }
+
+                    is SignUpViewModel.SignInUiState.Error -> {
+                        binding.registerProgressBar.isVisible = false
+                        Toast.makeText(context, it.msg, Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                    }
+                }
+            }
         }
 
         return binding.root
-    }
-
-
-    private fun signUp(email: String, password: String, username: String) {
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-//                    Toast.makeText(context, "register successful", Toast.LENGTH_SHORT).show()
-                    currentUser = task.result!!.user
-                    Log.d(Tag, "registered successfully")
-                    uploadDetails(username)
-                } else {
-                    binding.registerProgressBar.visibility = View.GONE
-                    Toast.makeText(context, "registration failed", Toast.LENGTH_SHORT).show()
-
-                }
-            }
-    }
-
-    private fun saveData(uid: String, username: String, profileImg: String) {
-        val sharedPref = context?.getSharedPreferences("user", Context.MODE_PRIVATE)
-        val editor = sharedPref?.edit()
-        editor?.apply {
-            putString("username", username)
-            putString("uid", uid)
-            putString("image", profileImg)
-            commit()
-        }
-
-    }
-
-    private fun uploadDetails(username: String) {
-
-        if (currentUser == null) {
-            Log.d(Tag, "returned as user is null")
-            return
-        }
-        val uid = currentUser!!.uid
-        val storageRef = FirebaseStorage.getInstance().getReference("/images/$uid")
-        if (selectedPhoto != null) {
-            storageRef.putFile(selectedPhoto!!)
-                .addOnCompleteListener {
-                    var photo = ""
-                    if (it.isSuccessful) {
-                        Toast.makeText(context, "photo uploaded", Toast.LENGTH_SHORT).show()
-                        Log.d(Tag, "photo added successfully")
-                    } else {
-                        Toast.makeText(context, "photo upload failed", Toast.LENGTH_SHORT).show()
-                    }
-
-                    storageRef.downloadUrl.addOnCompleteListener { task2 ->
-
-                        if (task2.isSuccessful) {
-                            photo = task2.result.toString()
-                            Log.d(Tag, "photo url is ${task2.result}")
-                        }
-                        Log.d(Tag, "photo url is $photo")
-
-                        val userObj = User(
-                            uid = uid,
-                            username = username,
-                            isOnline = true,
-                            profileImg = photo
-                        )
-                        saveData(uid, username, photo)
-                        FirebaseDatabase.getInstance().getReference("/users/$uid").setValue(userObj)
-                            .addOnCompleteListener { task3 ->
-                                if (task3.isSuccessful) {
-                                    Toast.makeText(
-                                        context,
-                                        "user added to database",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    binding.registerProgressBar.visibility = View.GONE
-                                    startActivity(Intent(context, MainActivity::class.java))
-                                    activity?.finish()
-
-                                } else {
-                                    binding.registerProgressBar.visibility = View.GONE
-                                    Toast.makeText(
-                                        context,
-                                        "failed to add user",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                    }
-                }
-        }
-
-
     }
 
 

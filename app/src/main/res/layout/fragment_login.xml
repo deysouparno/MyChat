@@ -4,62 +4,75 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    tools:context=".screens.LoginFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".screens.LoginFragment">
+        android:layout_height="match_parent">
 
 
-        <EditText
-            android:id="@+id/login_email"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textField_register1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="100dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/rounded_shape"
-            android:backgroundTint="?attr/colorSecondaryVariant"
             android:hint="@string/email"
-            android:inputType="textEmailAddress"
-            android:padding="10dp"
-            android:textColor="?attr/colorOnSecondary"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginBottom="20dp"
+            app:boxStrokeWidthFocused="0dp"
+            app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/login_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:background="@drawable/rounded_shape"
+                android:backgroundTint="?attr/colorSecondaryVariant"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
 
 
-        <EditText
-            android:id="@+id/login_password"
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textField2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/login_email"
-            android:layout_margin="20dp"
-            android:background="@drawable/rounded_shape"
-            android:backgroundTint="?attr/colorSecondaryVariant"
             android:hint="@string/password"
-            android:inputType="textPassword"
-            android:padding="10dp"
-            android:textColor="?attr/colorOnSecondary"
+            app:endIconMode="password_toggle"
+            android:layout_margin="20dp"
+            app:boxStrokeWidthFocused="0dp"
+            app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/login_email" />
+            app:layout_constraintTop_toBottomOf="@id/textField_register1" >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/login_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:background="@drawable/rounded_shape"
+                android:backgroundTint="?attr/colorSecondaryVariant"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/login_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/login_password"
             android:layout_margin="20dp"
             android:background="@drawable/rounded_shape"
             android:backgroundTint="?attr/colorSecondaryVariant"
-            android:padding="10dp"
+            android:padding="12dp"
             android:text="Log in"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/login_password" />
+            app:layout_constraintTop_toBottomOf="@+id/textField2" />
 
         <LinearLayout
             android:id="@+id/ll_login"

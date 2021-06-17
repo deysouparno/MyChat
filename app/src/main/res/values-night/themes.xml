@@ -14,6 +14,10 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="splash_theme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
     <style name="chatBubble_send">
         <item name="android:backgroundTint">#00897b</item>
         <item name="android:textColor">#fafafa</item>
@@ -22,6 +26,12 @@
     <style name="chatBubble_receive">
         <item name="android:backgroundTint">#263238</item>
         <item name="android:textColor">#fafafa</item>
+    </style>
+
+    <style name="search_style">
+        <item name="android:background">@color/primaryDarkColor</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">#E1DADA</item>
     </style>
 
     <style name="type_message">

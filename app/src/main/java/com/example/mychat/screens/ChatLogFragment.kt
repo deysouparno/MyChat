@@ -3,13 +3,14 @@ package com.example.mychat.screens
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.mychat.adapters.ChatLogAdapter
@@ -17,20 +18,20 @@ import com.example.mychat.databinding.FragmentChatLogBinding
 import com.example.mychat.models.ChatMessage
 import com.example.mychat.models.HomeScreenUser
 import com.example.mychat.models.User
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
+import com.example.mychat.viewmodels.ChatLogViewModel
+import com.example.mychat.viewmodels.ChatLogViewModelFactory
 import com.google.firebase.database.FirebaseDatabase
 
 
 class ChatLogFragment : Fragment() {
 
+//    private val sharedViewModel: SharedViewModel by activityViewModels()
     private lateinit var binding: FragmentChatLogBinding
     private lateinit var chatPerson: User
     private lateinit var chatFromPerson: User
-    private lateinit var messages: ArrayList<ChatMessage>
     private lateinit var adapter: ChatLogAdapter
     private var directory = ""
+    private lateinit var viewModel: ChatLogViewModel
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,21 +39,13 @@ class ChatLogFragment : Fragment() {
 
         binding = FragmentChatLogBinding.inflate(inflater)
 
+        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.chatLogToolbar)
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         val args: ChatLogFragmentArgs by navArgs()
 
         chatPerson = args.chatToPerson
         chatFromPerson = args.chatFromPerson
-
-        val chatFromImg = chatFromPerson.profileImg
-        val chatToImg = chatPerson.profileImg
-
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = chatPerson.username
-
-        messages = ArrayList()
-
-        adapter = ChatLogAdapter(chatFromPerson.username, chatFromImg, chatToImg)
-        binding.chatLogRV.adapter = adapter
-        adapter.submitList(messages)
 
         directory = if (chatFromPerson.uid < chatPerson.uid) {
             chatFromPerson.uid + chatPerson.uid
@@ -60,7 +53,25 @@ class ChatLogFragment : Fragment() {
             chatPerson.uid + chatFromPerson.uid
         }.trim()
 
-        listenMessages()
+        viewModel = ViewModelProvider(this, ChatLogViewModelFactory(directory))
+            .get(ChatLogViewModel::class.java)
+
+        val chatFromImg = chatFromPerson.profileImg
+        val chatToImg = chatPerson.profileImg
+
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = chatPerson.username
+
+
+        adapter = ChatLogAdapter(chatFromPerson.username, chatFromImg, chatToImg)
+        binding.chatLogRV.adapter = adapter
+        adapter.submitList(viewModel.messages)
+
+        viewModel.onAdd.observe(viewLifecycleOwner, {
+            adapter.addItem()
+            binding.chatLogRV.scrollToPosition(viewModel.messages.size-1)
+        })
+
+
 
 
         binding.sendButton.setOnClickListener {
@@ -74,21 +85,36 @@ class ChatLogFragment : Fragment() {
 
         }
 
+        binding.messageType.setOnClickListener {
+
+        }
+
         activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                findNavController().navigate(
-                    ChatLogFragmentDirections.actionChatLogFragmentToHomeScreenFragment()
-                )
+//                findNavController().navigate(
+//                    ChatLogFragmentDirections.actionChatLogFragmentToHomeScreenFragment()
+//                )
+                findNavController().navigateUp()
             }
 
         })
 
+        setHasOptionsMenu(true)
+//        Log.d("BackStack", "back stack size is ${findNavController().backStack.size}")
         return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        removeListener()
+//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+//        inflater.inflate(R.menu.options_menu, menu)
+//    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                findNavController().navigateUp()
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun updateLastMessage() {
@@ -135,49 +161,6 @@ class ChatLogFragment : Fragment() {
                     Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show()
                 }
             }
-
-    }
-
-    private fun listenMessages() {
-        val ref = FirebaseDatabase.getInstance().getReference(directory)
-        ref.addChildEventListener(listener)
-    }
-
-    private fun removeListener() {
-        val ref = FirebaseDatabase.getInstance().getReference(directory)
-        ref.removeEventListener(listener)
-    }
-
-    private val listener = object : ChildEventListener {
-        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-            val msg = snapshot.getValue(ChatMessage::class.java)
-            Log.d("ChatLog", "message sent")
-            if (msg != null) {
-                messages.add(msg)
-                adapter.notifyItemInserted(messages.size - 1)
-            }
-            binding.chatLogRV.scrollToPosition(messages.size - 1)
-        }
-
-        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-
-        }
-
-        override fun onChildRemoved(snapshot: DataSnapshot) {
-            val msg = snapshot.getValue(ChatMessage::class.java)
-            if (msg != null) {
-                messages.remove(msg)
-                adapter.notifyDataSetChanged()
-            }
-        }
-
-        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-
-        }
-
-        override fun onCancelled(error: DatabaseError) {
-
-        }
 
     }
 
