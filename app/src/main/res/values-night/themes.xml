@@ -18,6 +18,10 @@
         <item name="android:windowBackground">@drawable/launch_screen</item>
     </style>
 
+    <style name="group_icon" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="backgroundTint">@color/white</item>
+    </style>
+
     <style name="chatBubble_send">
         <item name="android:backgroundTint">#00897b</item>
         <item name="android:textColor">#fafafa</item>

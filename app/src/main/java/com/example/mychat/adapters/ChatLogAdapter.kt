@@ -1,30 +1,30 @@
 package com.example.mychat.adapters
 
 
+import android.content.res.Resources
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
+import androidx.core.content.ContextCompat
+import androidx.core.view.marginStart
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.mychat.R
 import com.example.mychat.databinding.ChatLogRecieveItemBinding
 import com.example.mychat.databinding.ChatLogSendItemBinding
+import com.example.mychat.getCurrentTime
 import com.example.mychat.models.ChatMessage
 
 private const val sendViewHolder = 1
 private const val receiveViewHolder = 0
+private var lastMsg = -1
 
 class ChatLogAdapter(
     private val fromPerson: String,
-    private val senderImg: String,
     private val receiverImg: String
 ) : ListAdapter<ChatMessage, RecyclerView.ViewHolder>(ChatMessageDiffCallback) {
 
-    var flag = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == sendViewHolder) {
@@ -36,22 +36,14 @@ class ChatLogAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = getItem(position)
-        if (getItemViewType(position) == receiveViewHolder) {
-            (holder as ChatReceiveViewHolder).bind(message, receiverImg)
+        lastMsg = if (getItemViewType(position) == receiveViewHolder) {
+            (holder as ChatReceiveViewHolder).bind(message)
+            receiveViewHolder
         } else {
-            (holder as ChatSendViewHolder).bind(message, senderImg)
+            (holder as ChatSendViewHolder).bind(message)
+            sendViewHolder
         }
 
-        if (flag) {
-            Log.d("chatanim", "animation called")
-            holder.itemView.startAnimation(
-                AnimationUtils.loadAnimation(
-                    holder.itemView.context,
-                    R.anim.chat_enter
-                )
-            )
-            flag = false
-        }
 
     }
 
@@ -64,35 +56,35 @@ class ChatLogAdapter(
     }
 
     fun addItem() {
-        flag = true
         notifyItemInserted(itemCount-1)
     }
 
-
-    object ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatMessage>() {
-        override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-            return oldItem.key == newItem.key
-        }
-
-        override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-            return oldItem == newItem
-        }
+    fun tailReset() {
+        lastMsg = -1
     }
 
+}
+
+object ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatMessage>() {
+    override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+        return oldItem.key == newItem.key
+    }
+
+    override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+        return oldItem == newItem
+    }
 }
 
 class ChatReceiveViewHolder(val binding: ChatLogRecieveItemBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(message: ChatMessage, chatFromImg: String) {
+    fun bind(message: ChatMessage) {
+        binding.timeText.text = getCurrentTime(message.time, 2)
         binding.textFrom.text = message.text
-        Glide.with(binding.imageViewFrom.context)
-            .load(chatFromImg)
-            .circleCrop()
-            .placeholder(R.drawable.ic_baseline_account_circle_24)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .into(binding.imageViewFrom)
-//        binding.root.startAnimation(AnimationUtils.loadAnimation(binding.root.context, R.anim.pop_enter))
+        if (lastMsg == receiveViewHolder) {
+            binding.textFrom.background = ContextCompat.getDrawable(binding.textFrom.context, R.drawable.rounded_shape)
+        }
+        Log.d("chatlog", "in adapter -> ${message.text}")
     }
 
     companion object {
@@ -106,15 +98,13 @@ class ChatReceiveViewHolder(val binding: ChatLogRecieveItemBinding) :
 
 class ChatSendViewHolder(val binding: ChatLogSendItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(message: ChatMessage, chatToImg: String) {
+    fun bind(message: ChatMessage) {
         binding.textTo.text = message.text
-        Glide.with(binding.imageViewTo.context)
-            .load(chatToImg)
-            .circleCrop()
-            .placeholder(R.drawable.ic_baseline_account_circle_24)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .into(binding.imageViewTo)
-//        binding.root.startAnimation(AnimationUtils.loadAnimation(binding.root.context, R.anim.pop_enter))
+        binding.timeText.text = getCurrentTime(message.time, 2)
+//        Log.d("chatlog", "in adapter -> ${message.text}")
+        if (lastMsg == sendViewHolder) {
+            binding.textTo.background = ContextCompat.getDrawable(binding.textTo.context, R.drawable.rounded_shape)
+        }
     }
 
     companion object {
@@ -124,4 +114,5 @@ class ChatSendViewHolder(val binding: ChatLogSendItemBinding) : RecyclerView.Vie
             return ChatSendViewHolder(binding)
         }
     }
+
 }

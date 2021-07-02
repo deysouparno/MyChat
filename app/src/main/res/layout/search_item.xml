@@ -17,6 +17,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/selected_image"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/selected"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/search_imageView"
+        app:layout_constraintEnd_toEndOf="@+id/search_imageView" />
+
     <TextView
         android:id="@+id/search_person_name"
         android:layout_width="wrap_content"

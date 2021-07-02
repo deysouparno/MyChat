@@ -2,6 +2,7 @@ package com.example.mychat.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -18,10 +19,12 @@ import com.example.mychat.models.User
 class NewChatAdapter(private val listener: ClickListener) :
     ListAdapter<User, NewChatAdapter.UserViewHolder>(UserItemDiffCallback) {
 
+    val selected = HashSet<Int>()
+
     class UserViewHolder private constructor(val binding: SearchItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(user: User) {
+        fun bind(user: User, selected : HashSet<Int>) {
             binding.searchPersonName.text = user.username
             Glide.with(binding.searchImageView.context)
                 .load(user.profileImg)
@@ -31,6 +34,8 @@ class NewChatAdapter(private val listener: ClickListener) :
                 .placeholder(R.drawable.ic_baseline_account_circle_24)
                 .error(R.drawable.ic_baseline_account_circle_24)
                 .into(binding.searchImageView)
+
+            binding.selectedImage.isVisible = selected.contains(adapterPosition)
 
         }
 
@@ -54,7 +59,7 @@ class NewChatAdapter(private val listener: ClickListener) :
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
         val user = getItem(position)
-        holder.bind(user)
+        holder.bind(user, selected)
     }
 
     object UserItemDiffCallback : DiffUtil.ItemCallback<User>() {

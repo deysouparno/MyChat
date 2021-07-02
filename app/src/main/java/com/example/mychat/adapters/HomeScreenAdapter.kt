@@ -1,5 +1,6 @@
 package com.example.mychat.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -38,6 +39,7 @@ class HomeScreenViewHolder(val binding: ChatItemBinding) :
     fun bind(item: HomeScreenUser, username: String) {
         binding.lastMessage.text = item.lastMsg
         binding.personName.text = item.username
+        Log.d("chatlog", "home adapter -> ${item.lastMsg}")
         Glide.with(binding.imageView.context)
             .load(item.profileImg)
             .circleCrop()
@@ -52,10 +54,15 @@ class HomeScreenViewHolder(val binding: ChatItemBinding) :
             val binding =
                 ChatItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             val viewHolder = HomeScreenViewHolder(binding)
-            binding.root.setOnClickListener {
+            binding.homeContainer.setOnClickListener {
                 listener.onClick(viewHolder.adapterPosition)
+            }
+            binding.imageView.setOnClickListener {
+                listener.showProfilePic(viewHolder.adapterPosition)
             }
             return viewHolder
         }
     }
+
+
 }

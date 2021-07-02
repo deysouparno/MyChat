@@ -1,5 +1,6 @@
 package com.example.mychat.screens
 
+import android.app.AlertDialog
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.pm.PackageManager
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -19,6 +21,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.mychat.R
 import com.example.mychat.SharedViewModel
 import com.example.mychat.databinding.FragmentAccountBinding
+import com.example.mychat.databinding.PopUpBinding
 
 
 class AccountFragment : Fragment() {
@@ -33,7 +36,7 @@ class AccountFragment : Fragment() {
         val currentUser = sharedViewModel.getUser(context)
         Glide.with(binding.profilePic.context)
             .load(currentUser.profileImg)
-            .circleCrop()
+            .fitCenter()
             .placeholder(R.drawable.ic_baseline_account_circle_24)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(binding.profilePic)
@@ -44,6 +47,14 @@ class AccountFragment : Fragment() {
             if (binding.switch1.isChecked) {
                 binding.switch1.isChecked = checkBiometricSupport()
             }
+        }
+
+        binding.profilePic.setOnClickListener {
+            val alertDialog = AlertDialog.Builder(context)
+            val popUpBinding = PopUpBinding.inflate(layoutInflater)
+            popUpBinding.imageView3.setImageDrawable(binding.profilePic.drawable)
+            alertDialog.setView(popUpBinding.root)
+            alertDialog.show()
         }
 
         return binding.root

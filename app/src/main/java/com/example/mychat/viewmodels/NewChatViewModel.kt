@@ -27,13 +27,8 @@ class NewChatViewModel(private val username : String) : ViewModel() {
     val users = ArrayList<User>()
     private val directory = "/users"
 
-//    private fun addListener() {
-//        Log.d("newchat", "listener added")
-//        FirebaseDatabase.getInstance().getReference(directory)
-//            .addChildEventListener(listener)
-//    }
 
-    fun getUsers() {
+    private fun getUsers() {
         FirebaseDatabase.getInstance().getReference(directory)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {

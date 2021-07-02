@@ -1,15 +1,14 @@
 package com.example.mychat.viewmodels
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import com.example.mychat.models.ChatMessage
+import com.example.mychat.models.User
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.launch
 
 class ChatLogViewModelFactory(private val directory: String) : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -22,6 +21,7 @@ class ChatLogViewModelFactory(private val directory: String) : ViewModelProvider
 
 class ChatLogViewModel(private val directory: String) : ViewModel() {
 
+    private val userData = MutableLiveData(User())
 
     private val _onAdd = MutableLiveData(true)
     val onAdd: LiveData<Boolean>
@@ -38,19 +38,19 @@ class ChatLogViewModel(private val directory: String) : ViewModel() {
             .addChildEventListener(listener)
     }
 
+    fun removeListener() {
+        FirebaseDatabase.getInstance().getReference(directory)
+            .removeEventListener(listener)
+    }
+
 
     private val listener = object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             val msg = snapshot.getValue(ChatMessage::class.java)
-            Log.d("ChatLog", "message sent")
             if (msg != null) {
                 messages.add(msg)
                 _onAdd.value = !_onAdd.value!!
             }
-        }
-
-        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
@@ -61,12 +61,23 @@ class ChatLogViewModel(private val directory: String) : ViewModel() {
             }
         }
 
-        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onCancelled(error: DatabaseError) {}
+    }
 
+    private val userListener = object : ChildEventListener {
+        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            userData.value = snapshot.getValue(User::class.java)
         }
+        override fun onChildRemoved(snapshot: DataSnapshot) {}
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+        override fun onCancelled(error: DatabaseError) {}
 
-        override fun onCancelled(error: DatabaseError) {
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+            if (previousChildName == null) {
 
+            }
         }
 
     }

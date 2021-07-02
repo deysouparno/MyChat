@@ -11,7 +11,9 @@ import androidx.navigation.fragment.findNavController
 import com.example.mychat.R
 import com.example.mychat.SharedViewModel
 import com.example.mychat.adapters.SwipeViewAdapter
+import com.example.mychat.currentTime
 import com.example.mychat.databinding.FragmentHomeScreenBinding
+import com.example.mychat.models.User
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 
@@ -20,6 +22,7 @@ class HomeScreenFragment : Fragment(){
 
     private val sharedViewModel: SharedViewModel by activityViewModels()
     private lateinit var binding: FragmentHomeScreenBinding
+    private lateinit var currentUser : User
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,11 +34,14 @@ class HomeScreenFragment : Fragment(){
                 HomeScreenFragmentDirections.actionHomeScreenFragmentToLoginFragment()
             )
         }
+        currentUser = sharedViewModel.getUser(context)
         binding = FragmentHomeScreenBinding.inflate(inflater)
         setHasOptionsMenu(true)
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.homeToolbar)
 
         setHasOptionsMenu(true)
+
+        sharedViewModel.updateStatus(currentUser.uid, "online")
 
         val tabLayout = binding.tabLayout
         binding.viewPager.adapter = SwipeViewAdapter(this)
@@ -62,9 +68,15 @@ class HomeScreenFragment : Fragment(){
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         when (item.itemId) {
+            R.id.new_group -> {
+                findNavController().navigate(
+                    HomeScreenFragmentDirections.actionHomeScreenFragmentToNewGroupFragment(currentUser)
+                )
+            }
             R.id.logout_menu_item -> {
                 FirebaseAuth.getInstance().signOut()
                 sharedViewModel.deleteData(context)
+                sharedViewModel.updateStatus(currentUser.uid, currentTime())
                 Log.d("log out", "logged out successfully")
                 findNavController().navigate(
                     HomeScreenFragmentDirections.actionHomeScreenFragmentToLoginFragment()
@@ -72,6 +84,11 @@ class HomeScreenFragment : Fragment(){
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sharedViewModel.updateStatus(currentUser.uid, currentTime())
     }
 
 

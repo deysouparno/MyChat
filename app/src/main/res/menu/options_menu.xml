@@ -3,8 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/new_group"
+        android:title="new group"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_baseline_group_24"/>
+
+    <item
         android:id="@+id/logout_menu_item"
         android:title="log out"
-        app:showAsAction="ifRoom"
+
         android:icon="@drawable/ic_baseline_logout_24"/>
 </menu>

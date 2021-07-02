@@ -44,8 +44,10 @@ class SignUpViewModel : ViewModel() {
                 storageRef.putFile(img)
                     .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        _uiState.value = SignInUiState.ImgUploaded
-                        imgUrl = storageRef.downloadUrl.toString()
+                        storageRef.downloadUrl.addOnSuccessListener {
+                            imgUrl = it.toString()
+                            _uiState.value = SignInUiState.ImgUploaded
+                        }
                     } else {
                         _uiState.value = SignInUiState.Error("Image upload error", 2)
                     }

@@ -74,4 +74,16 @@ dependencies {
 
     //biometric
     implementation "androidx.biometric:biometric-ktx:1.2.0-alpha03"
+
+    //circular imageview
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+//    //livedata
+//    def lifecycle_version = "2.4.0-alpha02"
+//    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
+
+    //room
+    def room_version = "2.3.0"
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
 }

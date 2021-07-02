@@ -3,6 +3,7 @@ package com.example.mychat
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.example.mychat.models.User
+import com.google.firebase.database.FirebaseDatabase
 
 class SharedViewModel : ViewModel() {
 
@@ -59,7 +60,7 @@ class SharedViewModel : ViewModel() {
         val username = sharedPref?.getString("username", "") ?: ""
         val uid = sharedPref?.getString("uid", "") ?: ""
         val image = sharedPref?.getString("image", "") ?: ""
-        return User(uid, username, true, image)
+        return User(uid, username, "true", image)
     }
 
     fun deleteData(context: Context?) {
@@ -72,6 +73,11 @@ class SharedViewModel : ViewModel() {
             remove("password")
         }?.apply()
 
+    }
+
+    fun updateStatus(uid : String, status : String) {
+        val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
+        ref.child("online").setValue(status)
     }
 
 }

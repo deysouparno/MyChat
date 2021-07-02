@@ -1,5 +1,6 @@
 package com.example.mychat.screens
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,9 +11,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.mychat.R
 import com.example.mychat.SharedViewModel
 import com.example.mychat.adapters.HomeScreenAdapter
 import com.example.mychat.databinding.FragmentHomeChatBinding
+import com.example.mychat.databinding.PopUpBinding
 import com.example.mychat.interfaces.ClickListener
 import com.example.mychat.models.User
 import com.example.mychat.viewmodels.HomeScreenViewModel
@@ -62,8 +67,9 @@ class HomeChatFragment : Fragment(), ClickListener {
         val user = User(
             viewModel.homeScreenUsers[position].uid,
             viewModel.homeScreenUsers[position].username,
-            true,
-            viewModel.homeScreenUsers[position].profileImg
+            "",
+            viewModel.homeScreenUsers[position].profileImg,
+
         )
         findNavController().navigate(
             HomeScreenFragmentDirections.actionHomeScreenFragmentToChatLogFragment(
@@ -71,6 +77,18 @@ class HomeChatFragment : Fragment(), ClickListener {
                 currentUser
             )
         )
+    }
+
+    override fun showProfilePic(position: Int) {
+        val alertDialog = AlertDialog.Builder(context)
+        val popUpBinding = PopUpBinding.inflate(layoutInflater)
+        Glide.with(requireContext())
+            .load(viewModel.homeScreenUsers[position].profileImg)
+            .placeholder(R.drawable.ic_baseline_account_circle_24)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(popUpBinding.imageView3)
+        alertDialog.setView(popUpBinding.root)
+        alertDialog.show()
     }
 
 

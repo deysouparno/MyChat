@@ -42,7 +42,7 @@ class NewChatFragment : Fragment(), ClickListener {
         binding = FragmentNewChatBinding.inflate(inflater)
         setHasOptionsMenu(true)
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.newChatToolbar)
-        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = ""
         val args: NewChatFragmentArgs by navArgs()
         chatFromPerson = args.userObj
         adapter = NewChatAdapter(this)
@@ -63,8 +63,6 @@ class NewChatFragment : Fragment(), ClickListener {
         viewModel.onChange.observe(viewLifecycleOwner, {
             adapter.submitList(viewModel.users)
             adapter.notifyDataSetChanged()
-            Log.d("newchat", "${viewModel.users.size}")
-            Log.d("newchat", "observer called")
         })
 
         binding.closeImg.setOnClickListener {
@@ -81,8 +79,11 @@ class NewChatFragment : Fragment(), ClickListener {
             binding.searchEditText.text.clear()
             binding.searchView.isVisible = false
         }
+        binding.backArrow.setOnClickListener {
+            findNavController().navigateUp()
+        }
 
-        Log.d("BackStack", "back stack size is ${findNavController().backStack.size}")
+//        Log.d("BackStack", "back stack size is ${findNavController().backStack.size}")
         return binding.root
     }
 
@@ -92,12 +93,6 @@ class NewChatFragment : Fragment(), ClickListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> {
-                findNavController().navigateUp()
-//                findNavController().navigate(
-//                    NewChatFragmentDirections.actionNewChatFragmentToHomeScreenFragment()
-//                )
-            }
             R.id.search_menu_item -> {
                 binding.searchView.startAnimation(
                     AnimationUtils.loadAnimation(
@@ -123,6 +118,10 @@ class NewChatFragment : Fragment(), ClickListener {
             )
         )
 
+    }
+
+    override fun showProfilePic(position: Int) {
+        TODO("Not yet implemented")
     }
 
     private fun filter(text: String) {

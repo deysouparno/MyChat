@@ -1,5 +1,6 @@
 package com.example.mychat.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.mychat.models.User
 import com.google.firebase.auth.FirebaseAuth
@@ -21,6 +22,7 @@ class LoginViewModel() : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     directory = "/users/${task.result!!.user!!.uid.trim()}"
+                    Log.d("Login", "directory is --$directory--")
                     _uiState.value = LoginUiState.Loading("getting account data...", 2)
                 } else {
                     _uiState.value = LoginUiState.Error("Failed to SignIn", 1)

@@ -5,11 +5,14 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class HomeScreenUser(
-    val uid: String,
-    val username: String,
-    val sender: String,
+    val uid: String = "",
+    val username: String = "",
+    val sender: String = "",
     val profileImg: String = "",
-    val lastMsg: String
+    val lastMsg: String = "",
+    val isGroup: Boolean = false
 ): Parcelable {
-    constructor(): this("", "", "", "", "")
+    init {
+
+    }
 }
