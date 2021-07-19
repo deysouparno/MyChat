@@ -9,6 +9,6 @@ data class ChatGroup(
     val name: String = "",
     val description : String = "",
     val image: String = "",
-    val members : ArrayList<User> = ArrayList()
+    val members : String = ""
 ) : Parcelable{
 }

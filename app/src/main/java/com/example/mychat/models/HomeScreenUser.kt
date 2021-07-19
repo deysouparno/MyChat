@@ -10,9 +10,6 @@ data class HomeScreenUser(
     val sender: String = "",
     val profileImg: String = "",
     val lastMsg: String = "",
-    val isGroup: Boolean = false
-): Parcelable {
-    init {
-
-    }
-}
+    val channel : String = "",
+    val group: Boolean = false
+): Parcelable

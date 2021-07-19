@@ -10,11 +10,13 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.example.mychat.SharedViewModel
+import com.example.mychat.checkSecurity
 import com.example.mychat.databinding.FragmentSplashScreenBinding
+import com.example.mychat.deleteData
+import com.example.mychat.getEmail
+import com.example.mychat.getPassword
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -26,7 +28,7 @@ import java.util.concurrent.Executor
 
 class SplashScreenFragment : Fragment() {
 
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+//    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     private lateinit var executor: Executor
     private lateinit var biometricPrompt: BiometricPrompt
@@ -70,8 +72,8 @@ class SplashScreenFragment : Fragment() {
         Log.d("Login", "verifying account")
         uiState.value = 1
         GlobalScope.launch {
-            val password = sharedViewModel.getPassword(context)
-            val email = sharedViewModel.getEmail(context)
+            val password = getPassword(context)
+            val email = getEmail(context)
 
             if (password != null && email != null) {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
@@ -90,7 +92,7 @@ class SplashScreenFragment : Fragment() {
         }
     }
     private fun requestLogin() {
-        sharedViewModel.deleteData(context)
+        deleteData(context)
         FirebaseAuth.getInstance().signOut()
         findNavController().navigate(
             SplashScreenFragmentDirections.actionSplashScreenFragmentToLoginFragment()
@@ -98,7 +100,7 @@ class SplashScreenFragment : Fragment() {
     }
 
     private fun setAuthentication() {
-        if (sharedViewModel.checkSecurity(context) != true) {
+        if (checkSecurity(context) != true) {
             Log.d("finger", "authentication disabled")
             return
         }

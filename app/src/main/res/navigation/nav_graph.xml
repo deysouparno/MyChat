@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_homeScreenFragment_to_newGroupFragment"
             app:destination="@id/newGroupFragment" />
+        <action
+            android:id="@+id/action_homeScreenFragment_to_imageViewerFragment"
+            app:destination="@id/imageViewerFragment" />
     </fragment>
     <fragment
         android:id="@+id/newChatFragment"
@@ -39,9 +42,6 @@
             app:destination="@id/chatLogFragment"
             app:popUpTo="@id/newChatFragment"
             app:popUpToInclusive="true" />
-        <argument
-            android:name="userObj"
-            app:argType="com.example.mychat.models.User" />
     </fragment>
     <fragment
         android:id="@+id/chatLogFragment"
@@ -51,13 +51,13 @@
         <argument
             android:name="chat_to_person"
             app:argType="com.example.mychat.models.User" />
-        <argument
-            android:name="chat_from_person"
-            app:argType="com.example.mychat.models.User" />
         <action
             android:id="@+id/action_chatLogFragment_to_homeScreenFragment"
             app:destination="@id/homeScreenFragment"
             app:launchSingleTop="true" />
+        <action
+            android:id="@+id/action_chatLogFragment_to_imageViewerFragment"
+            app:destination="@id/imageViewerFragment" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -116,9 +116,20 @@
         tools:layout="@layout/fragment_new_group" >
         <action
             android:id="@+id/action_newGroupFragment_to_groupChatFragment"
-            app:destination="@id/groupChatFragment" />
+            app:destination="@id/groupChatFragment"
+            app:popUpTo="@id/newGroupFragment"
+            app:popUpToInclusive="true" />
         <argument
             android:name="userObj"
             app:argType="com.example.mychat.models.User" />
+    </fragment>
+    <fragment
+        android:id="@+id/imageViewerFragment"
+        android:name="com.example.mychat.screens.ImageViewerFragment"
+        android:label="fragment_image_viewer"
+        tools:layout="@layout/fragment_image_viewer" >
+        <argument
+            android:name="code"
+            app:argType="integer" />
     </fragment>
 </navigation>

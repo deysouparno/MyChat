@@ -18,7 +18,9 @@ import com.example.mychat.SharedViewModel
 import com.example.mychat.adapters.HomeScreenAdapter
 import com.example.mychat.databinding.FragmentHomeChatBinding
 import com.example.mychat.databinding.PopUpBinding
+import com.example.mychat.getUser
 import com.example.mychat.interfaces.ClickListener
+import com.example.mychat.models.ChatGroup
 import com.example.mychat.models.User
 import com.example.mychat.viewmodels.HomeScreenViewModel
 import com.example.mychat.viewmodels.HomeViewModelFactory
@@ -26,7 +28,7 @@ import com.example.mychat.viewmodels.HomeViewModelFactory
 
 class HomeChatFragment : Fragment(), ClickListener {
 
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+//    private val sharedViewModel: SharedViewModel by activityViewModels()
     private lateinit var viewModel: HomeScreenViewModel
     private lateinit var binding: FragmentHomeChatBinding
     private lateinit var currentUser: User
@@ -37,13 +39,13 @@ class HomeChatFragment : Fragment(), ClickListener {
     ): View? {
         binding = FragmentHomeChatBinding.inflate(inflater)
 
-        currentUser = sharedViewModel.getUser(context)
+        currentUser = getUser(context)
         viewModel = ViewModelProvider(this, HomeViewModelFactory(currentUser))
             .get(HomeScreenViewModel::class.java)
 
         binding.homeScreenFab.setOnClickListener {
             findNavController().navigate(
-                HomeScreenFragmentDirections.actionHomeScreenFragmentToNewChatFragment(currentUser)
+                HomeScreenFragmentDirections.actionHomeScreenFragmentToNewChatFragment()
             )
         }
 
@@ -53,30 +55,44 @@ class HomeChatFragment : Fragment(), ClickListener {
         binding.homeScreenRV.adapter = adapter
         binding.homeScreenRV.layoutManager = manager
 
-        viewModel.onChanged.observe(viewLifecycleOwner, {
-            Log.d("HomeScreen", "observer called")
-            adapter.updateList(viewModel.homeScreenUsers)
-        })
+        handleObservers()
 
-
-//        Log.d("BackStack", "back stack size is ${findNavController().backStack.size}")
         return binding.root
     }
 
-    override fun onClick(position: Int) {
-        val user = User(
-            viewModel.homeScreenUsers[position].uid,
-            viewModel.homeScreenUsers[position].username,
-            "",
-            viewModel.homeScreenUsers[position].profileImg,
+    private fun handleObservers() {
+        viewModel.onChanged.observe(viewLifecycleOwner, {
+            adapter.updateList(viewModel.homeScreenUsers)
+        })
 
-        )
-        findNavController().navigate(
-            HomeScreenFragmentDirections.actionHomeScreenFragmentToChatLogFragment(
-                user,
-                currentUser
+        viewModel.onAdded.observe(viewLifecycleOwner, {
+            adapter.addItem(viewModel.homeScreenUsers.size-1)
+        })
+    }
+
+    override fun onClick(position: Int) {
+        if (!viewModel.homeScreenUsers[position].group) {
+            val user = User(
+                viewModel.homeScreenUsers[position].uid,
+                viewModel.homeScreenUsers[position].username,
+                "",
+                viewModel.homeScreenUsers[position].profileImg,
+                )
+            findNavController().navigate(
+                HomeScreenFragmentDirections.actionHomeScreenFragmentToChatLogFragment(user)
             )
-        )
+        } else {
+            val group = ChatGroup(
+                viewModel.homeScreenUsers[position].uid,
+                viewModel.homeScreenUsers[position].username,
+                "",
+                viewModel.homeScreenUsers[position].profileImg,
+                ""
+            )
+            findNavController().navigate(
+                HomeScreenFragmentDirections.actionHomeScreenFragmentToGroupChatFragment(group)
+            )
+        }
     }
 
     override fun showProfilePic(position: Int) {

@@ -47,46 +47,8 @@ class NewChatViewModel(private val username : String) : ViewModel() {
 
             })
     }
-//    private val listener = object : ChildEventListener {
-//        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-//            val user = snapshot.getValue(User::class.java)
-//            if (user != null && user.username != username) {
-//                users.add(user)
-//                _onChange.value = !_onChange.value!!
-//            }
-//        }
-//
-//        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-//            val user = snapshot.getValue(User::class.java)
-//            if (user != null) {
-//                var index = 0
-//                for (i in users.indices) {
-//                    if (users[i].username == user.username) {
-//                        index = i
-//                        break
-//                    }
-//                }
-//                users[index] = user
-//                _onChange.value = !_onChange.value!!
-//            }
-//        }
-//
-//        override fun onChildRemoved(snapshot: DataSnapshot) {
-//            val user = snapshot.getValue(User::class.java)
-//            if (user != null) {
-//                users.remove(user)
-//            }
-//        }
-//
-//        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
-//
-//        override fun onCancelled(error: DatabaseError) {}
-//
-//    }
 
     init {
-//        Log.d("newchat", "viewmodel created")
-//        addListener()
         getUsers()
     }
 

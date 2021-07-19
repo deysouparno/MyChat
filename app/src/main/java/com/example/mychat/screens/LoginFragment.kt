@@ -10,13 +10,13 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import com.example.mychat.SharedViewModel
 import com.example.mychat.databinding.FragmentLoginBinding
+import com.example.mychat.deleteData
+import com.example.mychat.saveData
 import com.example.mychat.viewmodels.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.collect
@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.collect
 
 class LoginFragment : Fragment() {
 
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+//    private val sharedViewModel: SharedViewModel by activityViewModels()
     private val viewModel: LoginViewModel by viewModels()
     private lateinit var binding: FragmentLoginBinding
 
@@ -72,17 +72,18 @@ class LoginFragment : Fragment() {
                         binding.loginProgressBar.isVisible = false
                         Log.d("Login", it.msg)
                         FirebaseAuth.getInstance().signOut()
-                        sharedViewModel.deleteData(context)
+                        deleteData(context)
                     }
 
                     is LoginViewModel.LoginUiState.Success -> {
-                        sharedViewModel.saveData(
+                        saveData(
                             context,
                             viewModel.user!!.uid,
                             viewModel.user!!.username,
                             viewModel.user!!.profileImg,
                             binding.loginPassword.text!!.toString(),
-                            binding.loginEmail.text!!.toString()
+                            binding.loginEmail.text!!.toString(),
+                            viewModel.user!!.status
                         )
 
                         findNavController().navigate(

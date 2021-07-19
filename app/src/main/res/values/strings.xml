@@ -10,4 +10,6 @@
     <string name="don_t_have_an_account">don\'t have an account ?</string>
     <string name="register"><u>Register</u></string>
     <string name="type_a_message">Type a message</string>
+    <string name="add_a_caption">add a caption</string>
+    <string name="finger_print_authentication">Finger print authentication</string>
 </resources>

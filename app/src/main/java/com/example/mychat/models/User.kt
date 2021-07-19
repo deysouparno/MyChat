@@ -11,4 +11,5 @@ data class User(
     var isOnline: String = "",
     val profileImg: String = "",
     val status : String = "",
+    val token : String = ""
 ) : Parcelable

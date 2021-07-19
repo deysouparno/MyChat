@@ -8,6 +8,7 @@ data class ChatMessage(
     val key: String = "",
     val text: String = "",
     val fromPerson: String = "",
-    val toPerson: String = "",
-    val time: String = ""
+    val time: String = "",
+    val type : Int = 0,
+    var link : String = ""
 )

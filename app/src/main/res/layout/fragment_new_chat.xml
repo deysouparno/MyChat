@@ -30,7 +30,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginStart="20dp"
-            android:text="MyChat"/>
+            android:text="Select User"/>
     </androidx.appcompat.widget.Toolbar>
 
 
@@ -42,6 +42,7 @@
             android:orientation="horizontal"
             android:padding="3dp"
             android:visibility="gone"
+            tools:visibility="visible"
             android:background="?attr/colorPrimary"
             app:layout_constraintBottom_toBottomOf="@+id/new_chat_toolbar"
             app:layout_constraintEnd_toEndOf="parent"
@@ -66,7 +67,7 @@
                 android:id="@+id/close_img"
                 android:layout_width="50dp"
                 android:layout_height="match_parent"
-                android:padding="5dp"
+                android:padding="8dp"
                 android:src="@drawable/ic_baseline_close_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -85,6 +86,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/new_chat_toolbar"
-        tools:listitem="@layout/chat_item" />
+        tools:listitem="@layout/search_item" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

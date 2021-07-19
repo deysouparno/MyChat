@@ -1,11 +1,13 @@
 package com.example.mychat.viewmodels
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mychat.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,6 +75,7 @@ class SignUpViewModel : ViewModel() {
     sealed class SignInUiState {
         object Success : SignInUiState()
         data class Error(val msg : String, val code : Int) : SignInUiState()
+        data class Loading(val msg : String, val code : Int) : SignInUiState()
         object ImgUploaded : SignInUiState()
         object Registered : SignInUiState()
         object Empty : SignInUiState()

@@ -31,6 +31,10 @@ class HomeScreenAdapter(private var chats: ArrayList<HomeScreenUser>,
         chats = items
         notifyDataSetChanged()
     }
+
+    fun addItem(pos : Int) {
+        notifyItemInserted(pos)
+    }
 }
 
 class HomeScreenViewHolder(val binding: ChatItemBinding) :
@@ -39,7 +43,6 @@ class HomeScreenViewHolder(val binding: ChatItemBinding) :
     fun bind(item: HomeScreenUser, username: String) {
         binding.lastMessage.text = item.lastMsg
         binding.personName.text = item.username
-        Log.d("chatlog", "home adapter -> ${item.lastMsg}")
         Glide.with(binding.imageView.context)
             .load(item.profileImg)
             .circleCrop()

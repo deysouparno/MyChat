@@ -1,16 +1,12 @@
 package com.example.mychat.viewmodels
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
+import com.example.mychat.models.ChatMessage
 import com.example.mychat.models.HomeScreenUser
 import com.example.mychat.models.User
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
+import kotlinx.coroutines.launch
 
 class HomeViewModelFactory(private val currentUser: User) : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -28,9 +24,12 @@ class HomeScreenViewModel(private val user: User) : ViewModel() {
     val onChanged: LiveData<Boolean>
         get() = _onChanged
 
+    private val _onAdded = MutableLiveData(true)
+    val onAdded: LiveData<Boolean>
+        get() = _onAdded
+
 
     private fun addListener() {
-        Log.d("HomeScreen", "listener added")
         FirebaseDatabase.getInstance().getReference("/chats${user.uid}")
             .addChildEventListener(listener)
     }
@@ -40,9 +39,9 @@ class HomeScreenViewModel(private val user: User) : ViewModel() {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             val homeScreenUser = snapshot.getValue(HomeScreenUser::class.java)
             if (homeScreenUser != null) {
-                Log.d("HomeScreen", "new homeUser is ${homeScreenUser.username}")
                 homeScreenUsers.add(homeScreenUser)
-                _onChanged.value = !_onChanged.value!!
+                _onAdded.value = !_onAdded.value!!
+                addChatListeners(homeScreenUser)
             }
         }
 
@@ -63,25 +62,50 @@ class HomeScreenViewModel(private val user: User) : ViewModel() {
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
-            Log.d("HomeScreen", "child removed")
             val homeScreenUser = snapshot.getValue(HomeScreenUser::class.java)
             if (homeScreenUser != null) {
                 homeScreenUsers.remove(homeScreenUser)
+                _onChanged.value = !_onChanged.value!!
             }
         }
 
-        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-            Log.d("HomeScreen", "child moved")
-        }
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) = Unit
 
-        override fun onCancelled(error: DatabaseError) {
-            Log.d("HomeScreen", "error")
-        }
+        override fun onCancelled(error: DatabaseError) = Unit
 
     }
 
+    fun addChatListeners(homeUser : HomeScreenUser) {
+//        Log.d("chats", "when demo called homscreenusers size -> ${homeScreenUsers.size}")
+
+//            Log.d("chats", "listener added for ${homeUser.username}\n and channel is ${homeUser.channel}")
+            FirebaseDatabase.getInstance().getReference("/${homeUser.channel}").limitToLast(1)
+                .addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val temp = arrayListOf<ChatMessage>()
+                        snapshot.children.forEach {
+                            val item = it.getValue(ChatMessage::class.java)
+                            if (item != null) temp.add(item)
+                        }
+                        updateLastMessage(homeUser, temp[0])
+//                        Log.d("chats", "last msg is ${temp[0].text}\n and chatmessage is is ${temp[0]}")
+                    }
+
+                    override fun onCancelled(error: DatabaseError) = Unit
+
+                })
+
+    }
+
+    private fun updateLastMessage(hmUser: HomeScreenUser, msg : ChatMessage) {
+        val text = if (msg.text == "") "image" else msg.text
+        viewModelScope.launch {
+            FirebaseDatabase.getInstance().getReference("chats${user.uid}/${hmUser.uid}")
+                .child("lastMsg").setValue(text)
+        }
+    }
+
     init {
-        Log.d("HomeScreen", "viewmodel created")
         addListener()
     }
 }

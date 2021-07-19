@@ -15,7 +15,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
@@ -23,9 +22,9 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.canhub.cropper.CropImage
 import com.canhub.cropper.CropImageView
-import com.example.mychat.SharedViewModel
 import com.example.mychat.databinding.FragmentSingnUpBinding
 import com.example.mychat.models.User
+import com.example.mychat.saveData
 import com.example.mychat.viewmodels.SignUpViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.collect
@@ -50,7 +49,7 @@ class SignUpFragment : Fragment() {
 
     }
     private lateinit var cropActivityResultLauncher: ActivityResultLauncher<Any?>
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+//    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     //    private var currentUser: FirebaseUser? = null
     private lateinit var binding: FragmentSingnUpBinding
@@ -67,7 +66,6 @@ class SignUpFragment : Fragment() {
                 SignUpFragmentDirections.actionSignUpFragmentToHomeScreenFragment()
             )
         }
-
         binding = FragmentSingnUpBinding.inflate(inflater)
 
         Log.d(Tag, "current user is ${FirebaseAuth.getInstance().currentUser?.uid}")
@@ -131,16 +129,17 @@ class SignUpFragment : Fragment() {
                         val user = User(
                             viewModel.uid,
                             binding.registerUsername.text.toString(),
-                            true,
-                            viewModel.imgUrl
+                            "true",
+                            viewModel.imgUrl,
                         )
-                        sharedViewModel.saveData(
+                        saveData(
                             context,
                             user.uid,
                             user.username,
                             user.profileImg,
                             binding.registerPassword.text.toString(),
-                            binding.registerEmail.text.toString()
+                            binding.registerEmail.text.toString(),
+                            ""
                         )
                         viewModel.uploadUserData(user)
                     }

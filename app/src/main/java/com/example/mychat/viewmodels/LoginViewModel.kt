@@ -1,10 +1,12 @@
 package com.example.mychat.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.mychat.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -42,6 +44,7 @@ class LoginViewModel() : ViewModel() {
                 }
             }
     }
+
 
     sealed class LoginUiState {
         object Empty : LoginUiState()

@@ -4,7 +4,6 @@ import android.app.Activity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
@@ -12,14 +11,12 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.example.mychat.R
-import com.example.mychat.SharedViewModel
 import com.example.mychat.adapters.NewChatAdapter
 import com.example.mychat.databinding.FragmentNewChatBinding
+import com.example.mychat.getUser
 import com.example.mychat.interfaces.ClickListener
 import com.example.mychat.models.User
 import com.example.mychat.viewmodels.NewChatViewModel
@@ -30,7 +27,7 @@ import kotlin.collections.ArrayList
 
 class NewChatFragment : Fragment(), ClickListener {
 
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+//    private val sharedViewModel: SharedViewModel by activityViewModels()
     private lateinit var binding: FragmentNewChatBinding
     private lateinit var adapter: NewChatAdapter
     private lateinit var chatFromPerson: User
@@ -43,8 +40,7 @@ class NewChatFragment : Fragment(), ClickListener {
         setHasOptionsMenu(true)
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.newChatToolbar)
         (requireActivity() as AppCompatActivity).supportActionBar?.title = ""
-        val args: NewChatFragmentArgs by navArgs()
-        chatFromPerson = args.userObj
+        chatFromPerson = getUser(context)
         adapter = NewChatAdapter(this)
         handleSearch()
         viewModel =
@@ -53,7 +49,7 @@ class NewChatFragment : Fragment(), ClickListener {
             )
         binding.userRecyclerView.adapter = adapter
 //        viewModel.getUsers()
-        activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 findNavController().navigateUp()
             }
@@ -112,10 +108,7 @@ class NewChatFragment : Fragment(), ClickListener {
 
     override fun onClick(position: Int) {
         findNavController().navigate(
-            NewChatFragmentDirections.actionNewChatFragmentToChatLogFragment(
-                viewModel.users[position],
-                chatFromPerson
-            )
+            NewChatFragmentDirections.actionNewChatFragmentToChatLogFragment(viewModel.users[position])
         )
 
     }
